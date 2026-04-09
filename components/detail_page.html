@@ -3,6 +3,10 @@
 {% block title %}Shared Story - {{ analysis.repo_name }}{% endblock %}
 {% block meta_description %}Public Commit Story view for {{ analysis.repo_name }} with reusable narrative output and contribution insights.{% endblock %}
 
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
 {% block content %}
 <section class="page-content">
   <div class="container container--wide">
@@ -33,6 +37,16 @@
 
     <section class="result-grid mt-8">
       <div class="result-sidebar">
+        {% if insights.chart_data %}
+        <article class="card mb-6 animate-fade-in-up" style="padding: var(--space-5);">
+          <p class="section-label">Engineering Velocity</p>
+          <h2 class="mb-4" style="font-size:1.1rem">Development Story</h2>
+          <div style="height: 220px; width: 100%;">
+            <canvas id="velocityChart"></canvas>
+          </div>
+        </article>
+        {% endif %}
+
         <article class="card">
           <p class="section-label">Share link</p>
           <h2 style="font-size:1.2rem">Reusable public URL</h2>
@@ -66,4 +80,119 @@
     </section>
   </div>
 </section>
+
+{% if insights.chart_data %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('velocityChart').getContext('2d');
+    const chartData = {{ insights.chart_data | tojson }};
+    
+    if (!chartData || chartData.length === 0) return;
+
+    const labels = chartData.map(d => d.label);
+    const commitCounts = chartData.map(d => d.commits);
+    const featureDensity = chartData.map(d => d.feature_density);
+    const bugfixRatio = chartData.map(d => d.bugfix_ratio);
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Commits',
+            data: commitCounts,
+            backgroundColor: 'rgba(124, 58, 237, 0.7)',
+            borderColor: '#7c3aed',
+            borderWidth: 1,
+            borderRadius: 4,
+            yAxisID: 'y'
+          },
+          {
+            label: 'Features %',
+            data: featureDensity,
+            backgroundColor: 'rgba(16, 185, 129, 0.5)',
+            borderColor: '#10b981',
+            borderWidth: 1,
+            borderRadius: 4,
+            yAxisID: 'y1'
+          },
+          {
+            label: 'Bugs %',
+            data: bugfixRatio,
+            backgroundColor: 'rgba(239, 68, 68, 0.5)',
+            borderColor: '#ef4444',
+            borderWidth: 1,
+            borderRadius: 4,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#94a3b8',
+              font: { family: 'Inter, system-ui, sans-serif', size: 10 },
+              usePointStyle: true,
+              padding: 10
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            titleColor: '#fff',
+            bodyColor: '#cbd5e1',
+            borderColor: '#334155',
+            borderWidth: 1,
+            padding: 10,
+            boxPadding: 4,
+            usePointStyle: true,
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) label += ': ';
+                if (context.parsed.y !== null) {
+                  label += context.parsed.y + (context.datasetIndex > 0 ? '%' : '');
+                }
+                return label;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { 
+              color: '#64748b', 
+              font: { size: 10 },
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 5
+            }
+          },
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            grid: { color: 'rgba(148, 163, 184, 0.05)' },
+            ticks: { color: '#64748b', font: { size: 10 }, stepSize: 1 }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            ticks: { color: '#64748b', font: { size: 10 } },
+            min: 0,
+            max: 100
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endif %}
 {% endblock %}

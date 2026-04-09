@@ -26,23 +26,7 @@ The application follows a simplified, developer-friendly architecture:
 - **Lightweight Backend**: Powered by Flask and SQLite for zero-config setup.
 - **Modern UI**: Dark-themed, mobile-responsive glassmorphism design.
 
-## 🚀 Deployment
-
-Since this is a Flask application, it requires a Python server (not GitHub Pages). We recommend **Render** or **Railway** for free/easy hosting.
-
-### Deploy on Render:
-1. Push your code to a GitHub repository.
-2. Go to [Render.com](https://render.com/) and create a "New Web Service".
-3. Connect your repository.
-4. Settings:
-   - **Environment**: `Python`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn "app:create_app()"`
-5. Add **Environment Variables**:
-   - `GEMINI_API_KEY`: Your Gemini API key.
-   - `SECRET_KEY`: A long random string.
-
-## 📂 Project Structure
+##  Project Structure
 
 - `app.py`: Application entry point and factory.
 - `config.py`: Central configuration file.

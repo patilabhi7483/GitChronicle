@@ -196,6 +196,23 @@ def build_contribution_insights(commits: list[dict], groups: list[dict]) -> dict
     date_from = min(dated_commits, default=None)
     date_to = max(dated_commits, default=None)
 
+    # Generate time-series data for charts (chronological order)
+    chart_data = []
+    dated_groups = sorted(
+        [g for g in groups if g.get("week_key") != "undated"],
+        key=lambda g: g["week_key"]
+    )
+    for g in dated_groups:
+        total = g["commit_count"]
+        features = g["type_counts"].get("feature", 0)
+        bugfixes = g["type_counts"].get("bugfix", 0) + g["type_counts"].get("hotfix", 0)
+        chart_data.append({
+            "label": g["label"].replace("Week of ", ""),
+            "commits": total,
+            "feature_density": round((features / total * 100), 1) if total > 0 else 0,
+            "bugfix_ratio": round((bugfixes / total * 100), 1) if total > 0 else 0
+        })
+
     return {
         "total_commits": len(commits),
         "contributors_count": len(contributors),
@@ -216,6 +233,7 @@ def build_contribution_insights(commits: list[dict], groups: list[dict]) -> dict
         "date_from": date_from.strftime("%b %d, %Y") if date_from else "",
         "date_to": date_to.strftime("%b %d, %Y") if date_to else "",
         "has_dated_commits": bool(dated_commits),
+        "chart_data": chart_data,
     }
 
 

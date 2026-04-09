@@ -78,5 +78,4 @@ h1{font-size:4rem;color:#dc2626}p{color:#94a3b8;max-width:600px}a{color:#a78bfa;
 
 if __name__ == "__main__":
     app = create_app()
-    port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, host="0.0.0.0", port=port)
+    app.run(debug=True, host="0.0.0.0", port=5000)

@@ -144,24 +144,35 @@ This project was built iteratively, starting with core infrastructure and progre
 class GeminiClient:
     def __init__(self):
         self._configured = False
+        self._model = None
         if not GEMINI_AVAILABLE:
             return
-        key = config.GEMINI_API_KEY
-        if key and key != "YOUR_GEMINI_API_KEY_HERE":
-            genai.configure(api_key=key)
-            self._model = genai.GenerativeModel(config.GEMINI_MODEL)
-            self._configured = True
+            
+        # Prioritize environment variable, then config file
+        key = os.environ.get("GEMINI_API_KEY") or config.GEMINI_API_KEY
+        
+        # Valid key should not be empty or the placeholder
+        if key and key.strip() and key != "YOUR_GEMINI_API_KEY_HERE":
+            try:
+                genai.configure(api_key=key.strip())
+                # Use the configured model from config.py
+                self._model = genai.GenerativeModel(config.GEMINI_MODEL)
+                self._configured = True
+            except Exception as e:
+                print(f"Gemini API Initialization Error: {e}")
+                self._configured = False
 
     def is_available(self) -> bool:
-        return GEMINI_AVAILABLE and self._configured
+        return GEMINI_AVAILABLE and self._configured and self._model is not None
 
     def generate_all(self, commit_data_text: str, repo_name: str = "") -> dict:
         """Generate all 4 narrative formats. Returns dict keyed by format name."""
-        if not self.is_available():
-            return DEMO_OUTPUTS.copy()
-
         results = {}
         formats = ["release", "standup", "onboarding", "portfolio"]
+
+        # If API is not available or fails, fallback gracefully to DEMO_OUTPUTS
+        if not self.is_available():
+            return DEMO_OUTPUTS.copy()
 
         for i, fmt in enumerate(formats):
             try:
@@ -170,7 +181,9 @@ class GeminiClient:
                 if i < len(formats) - 1:
                     time.sleep(4)
             except Exception as e:
-                results[fmt] = f"*Error generating {fmt}: {str(e)}*\n\n{DEMO_OUTPUTS.get(fmt, '')}"
+                print(f"Error generating {fmt} with Gemini: {e}")
+                # Individual format failure falls back to its demo output
+                results[fmt] = DEMO_OUTPUTS.get(fmt, f"Error generating {fmt}.")
 
         return results
 
@@ -178,9 +191,17 @@ class GeminiClient:
         """Generate one narrative format."""
         if not self.is_available():
             return DEMO_OUTPUTS.get(fmt, "Demo output not available.")
-        return self._generate_single(fmt, commit_data_text)
+        
+        try:
+            return self._generate_single(fmt, commit_data_text)
+        except Exception as e:
+            print(f"Error in generate_single ({fmt}): {e}")
+            return DEMO_OUTPUTS.get(fmt, f"Error: {str(e)}")
 
     def _generate_single(self, fmt: str, commit_data_text: str) -> str:
+        if not self._model:
+            raise ValueError("Gemini model not initialized")
+
         prompt_template = PROMPTS.get(fmt, PROMPTS["release"])
         prompt = prompt_template.format(commit_data=commit_data_text)
 
@@ -194,12 +215,18 @@ class GeminiClient:
             generation_config=generation_config,
         )
 
+        # Handle empty response or safety blocks
+        if not response or not hasattr(response, 'text'):
+            return DEMO_OUTPUTS.get(fmt, "AI response unavailable.")
+
         text = response.text.strip()
-        # Strip any preamble before the first # heading
+        
+        # Strip any preamble before the first # heading if AI adds conversational filler
         if "---END_COMMIT_DATA---" in text:
             text = text.split("---END_COMMIT_DATA---")[-1].strip()
+        
         return text
 
-
-# Singleton instance
+# Global singleton instance
+import os
 gemini = GeminiClient()

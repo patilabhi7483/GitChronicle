@@ -14,11 +14,11 @@ DATABASE_PATH = os.path.join(BASE_DIR, "data", "commitstory.db")
 # ─── Gemini AI API ──────────────────────────────────────────────────────────
 # Get your FREE key at: https://aistudio.google.com/
 # Free tier: 15 RPM, 1,500 RPD, 1M tokens/day
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY_HERE")
-GEMINI_MODEL = "gemini-1.5-flash"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_MODEL = "gemini-3-flash-preview"  # Using supported stable model
 
 # GitHub API (used for repository URL analysis on github.com)
-GITHUB_API_TOKEN = os.environ.get("GITHUB_API_TOKEN", "")
+GITHUB_API_TOKEN = os.getenv("GITHUB_API_TOKEN")
 GITHUB_API_BASE_URL = os.environ.get("GITHUB_API_BASE_URL", "https://api.github.com")
 GITHUB_API_TIMEOUT_SECONDS = int(os.environ.get("GITHUB_API_TIMEOUT_SECONDS", "20"))
 GITHUB_API_USER_AGENT = os.environ.get("GITHUB_API_USER_AGENT", "CommitStory/1.0")
@@ -57,5 +57,5 @@ ENABLE_HISTORY = True       # Show /history page
 ENABLE_SHARE = True         # Enable /share/<slug> public links
 
 # ─── Flask ───────────────────────────────────────────────────────────────────
-SECRET_KEY = os.environ.get("SECRET_KEY", "commit-story-dev-secret-change-in-prod")
+SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.environ.get("FLASK_DEBUG", "false").lower() == "true"

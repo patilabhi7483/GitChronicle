@@ -1,23 +1,100 @@
-# Python bytecode
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+my-log.txt
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/commitstory.db
+
+# Sensitive configuration files
+config.py
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.key
+*.pem
+*.p12
+
+# API keys and secrets
+secrets.txt
+api_keys.txt
+credentials.json
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# Node modules (if any)
+node_modules/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
 
 # Environments
-.env
-.venv
-env/
-venv/
-ENV/
-
-# Data and Logs
-data/*.db
-data/*.db-shm
-data/*.db-wal
-temp/
-logs/
-*.log
-
-# OS files
-.DS_Store
-Thumbs.db
+.venv/
+.env/
